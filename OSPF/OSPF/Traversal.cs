@@ -9,7 +9,7 @@ namespace OSPF
         // Dijkstra's algorithm to find shortest path from s to all other nodes
         public static Dictionary<string, string> dijkstra(NetworkGraph G, string source)
         {
-            string[] routers = G.getEdges();
+            string[] routers = G.GetEdges();
             int[] dist = new int[routers.Length];
             string[] queue = new string[routers.Length];
             Dictionary<string, string> pred = new Dictionary<string, string>();
@@ -31,7 +31,7 @@ namespace OSPF
                 if (next != -1)
                 {
                     visited[next] = true;
-                    string[] neighbors = G.getNeighbors(routers[next]);
+                    string[] neighbors = G.GetNeighbors(routers[next]);
                     for (int j = 0; j < neighbors.Length; j++)
                     {
                         int nr = 0;
@@ -42,7 +42,7 @@ namespace OSPF
                                 nr = h;
                             }
                         }
-                        int d = dist[next] + G.getCost(routers[next], routers[nr]);
+                        int d = dist[next] + G.GetCost(routers[next], routers[nr]);
                         if (dist[nr] > d)
                         {
                             dist[nr] = d;

@@ -43,7 +43,7 @@ namespace OSPF
         public void RemoveLink(Router router)
         {
             Neighbors.Remove(router);
-            Network.removeLink(Id, router.Id);
+            Network.RemoveLink(Id, router.Id);
             ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
         }
 
@@ -58,13 +58,13 @@ namespace OSPF
         {
             NetworkGraph secondNetwork = router.Network;
 
-            foreach(string edge in secondNetwork.getEdges())
+            foreach(string edge in secondNetwork.GetEdges())
             {
                 Network.AddEdge(edge);
-                foreach(string neighbor in secondNetwork.getNeighbors(edge))
+                foreach(string neighbor in secondNetwork.GetNeighbors(edge))
                 {
                     Network.AddEdge(neighbor);
-                    Network.SetLink(edge, neighbor, secondNetwork.getCost(edge, neighbor));
+                    Network.SetLink(edge, neighbor, secondNetwork.GetCost(edge, neighbor));
                 }
             }
 

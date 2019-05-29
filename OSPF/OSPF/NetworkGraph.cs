@@ -17,13 +17,6 @@ namespace OSPF
             map = new Dictionary<string, int>();
             freeCells = new LinkedList<int>();
 
-            for (int i = 0; i < maxRouters; i++)
-            {
-                for (int j = 0; j < maxRouters; j++)
-                {
-                    edges[i][j] = 0;
-                }
-            }
         }
 
         public virtual int Size
@@ -34,7 +27,7 @@ namespace OSPF
             }
         }
 
-        public string[] getEdges()
+        public string[] GetEdges()
         {
                 string[] router = new string[map.Count];
                 int i = 0;
@@ -46,7 +39,7 @@ namespace OSPF
                 return router;
         }
 
-        public virtual bool AddEdge(string router)
+        public bool AddEdge(string router)
         {
             int index;
             if (map.ContainsKey(router))
@@ -68,7 +61,7 @@ namespace OSPF
             return true;
         }
 
-        public virtual bool RemoveEdge(string router)
+        public bool RemoveEdge(string router)
         {
             int index;
             if (map.ContainsKey(router))
@@ -89,7 +82,7 @@ namespace OSPF
             }
         }
 
-        public virtual bool SetLink(string source, string dest, int cost)
+        public bool SetLink(string source, string dest, int cost)
         {
             if (map.ContainsKey(source) && map.ContainsKey(dest))
             {
@@ -103,7 +96,7 @@ namespace OSPF
             }
         }
 
-        public virtual bool removeLink(string source, string dest)
+        public bool RemoveLink(string source, string dest)
         {
             if (map.ContainsKey(source) && map.ContainsKey(dest))
             {
@@ -117,7 +110,7 @@ namespace OSPF
             }
         }
 
-        public virtual int getWeight(string source, string dest)
+        public int GetCost(string source, string dest)
         {
             if (map.ContainsKey(source) && map.ContainsKey(dest))
             {
@@ -129,7 +122,7 @@ namespace OSPF
             }
         }
 
-        public virtual string[] getNeighbors(string router)
+        public string[] GetNeighbors(string router)
         {
             int[] numbers;
             string[] neighbors;
