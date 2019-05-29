@@ -31,12 +31,11 @@ namespace OSPF
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool AddRouter(string id)
+        public void AddRouter(string id)
         {
             if (_routers.Any(router => router.Id == id))
-                return false;
+                throw new ArgumentException($"router with id: {id} already exists");
             _routers.Add(new Router(id));
-            return true;
         }
 
         /// <summary>
@@ -44,19 +43,17 @@ namespace OSPF
         /// </summary>
         /// <param name="id"></param>
         /// <returns>If could find a router by given id</returns>
-        public bool RemoveRouter(string id)
+        public void RemoveRouter(string id)
         {
             Router router = _routers
                 .FirstOrDefault(r => r.Id == id);
             if (router == null)
-                return false;
+                throw new ArgumentException($"router with id: {id} does not exist");
             
             router.Neighbors
                 .ForEach(neighbor => neighbor.RemoveRouter(router));
 
             _routers.Remove(router);
-
-            return true;
         }
 
         /// <summary>
@@ -66,7 +63,7 @@ namespace OSPF
         /// <param name="destination"></param>
         /// <param name="cost"></param>
         /// <returns></returns>
-        public bool AddLink(string source, string destination, int cost)
+        public void AddLink(string source, string destination, int cost)
         {
             Router first = _routers
                 .FirstOrDefault(r => r.Id == source);
@@ -74,10 +71,9 @@ namespace OSPF
                 .FirstOrDefault(r => r.Id == destination);
 
             if (first == null || second == null)
-                return false;
+                throw new ArgumentException($"{source} => {first} {destination} => {second}");
 
             first.AddLink(second, cost);
-            return true;
         }
 
         /// <summary>
@@ -86,7 +82,7 @@ namespace OSPF
         /// <param name="source"></param>
         /// <param name="destination"></param>
         /// <returns></returns>
-        public bool RemoveLink(string source, string destination)
+        public void RemoveLink(string source, string destination)
         {
             Router first = _routers
                 .FirstOrDefault(r => r.Id == source);
@@ -94,12 +90,10 @@ namespace OSPF
                 .FirstOrDefault(r => r.Id == destination);
 
             if (first == null || second == null)
-                return false;
+                throw new ArgumentException($"{source} => {first} {destination} => {second}");
 
             first.RemoveLink(second);
             second.RemoveLink(first);
-
-            return true;
         }
 
         /// <summary>
@@ -109,20 +103,13 @@ namespace OSPF
         /// <param name="destination"></param>
         /// <param name="message"></param>
         /// <returns>if could find source</returns>
-        public bool SendMessage(string source, string destination, string message)
+        public void SendMessage(string source, string destination, string message)
         {
             Router router = _routers.FirstOrDefault(r => r.Id == source);
             if (router == null)
-                return false;
-            Message msg = new Message
-            {
-                Router = router,
-                Destination = destination,
-                Data = message
-            };
-            Thread thread = new Thread(msg.Send);
-            thread.Start();
-            return true;
+                throw new ArgumentException($"Given source router: {source} does not exist");
+
+            new Thread(() => router.SendMessage(destination, message)).Start();
         }
     }
 }

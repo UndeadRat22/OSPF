@@ -90,23 +90,26 @@ namespace OSPF
             }
         }
 
-        public void SendMessage(string dest, string text)
+        public void SendMessage(string destination, string data)
         {
-            Program.Write("Zinute '" + text + "' routeryje vardu - " + Id);
-            Thread.Sleep(5000);
-            if (dest == Id)
+            Program.Write("Zinute '" + data + "' routeryje vardu - " + Id);
+            Thread.Sleep(200);
+            if (destination == Id)
             {
-                Program.Write("Zinute '" + text + " pasieke norima routeri vardu - " + Id);
+                Program.Write("Zinute '" + data + " pasieke norima routeri vardu - " + Id);
                 Program.Write(" ");
             } else
             {
-                string sendTo;
-                Connections.TryGetValue(dest, out sendTo);
-                foreach(Router router in Neighbors)
+                //sendTo => kam reikia siųsti message'ą kad šis persiųstų arčiau
+                //destinationso
+                Connections.TryGetValue(destination, out string sendTo);
+                if (sendTo == null)
+                    throw new ArgumentException($"Can't reach the given destination ({destination}) from {Id}");
+                foreach (Router router in Neighbors)
                 {
                     if(sendTo != null && sendTo == router.Id)
                     {
-                        router.SendMessage(dest, text);
+                        router.SendMessage(destination, data);
                         break;
                     }
                 }
