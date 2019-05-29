@@ -21,7 +21,7 @@ namespace OSPF
             Id = id;
             Neighbors = new List<Router>();
             _packets = new List<int>();
-            Network = new Graph(16);
+            Network = new Graph();
             Network.AddNode(id);
             Connections = new Dictionary<string, string>
             {
@@ -91,7 +91,7 @@ namespace OSPF
         public void SendMessage(string destination, string data)
         {
             Program.Write("Zinute '" + data + "' routeryje vardu - " + Id);
-            Thread.Sleep(200);
+            Thread.Sleep(Settings.NetworkDelayTime);
             if (destination == Id)
             {
                 Program.Write("Zinute '" + data + " pasieke norima routeri vardu - " + Id);

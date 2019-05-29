@@ -12,11 +12,13 @@ namespace OSPF
 
         public IEnumerable<string> Nodes { get { return _map.Keys; } }
 
-        public Graph(int nodeCount)
+        public Graph()
         {
-            _networkNodes = Utility.Matrix(nodeCount);
+            _networkNodes = Utility.Matrix(Settings.MaxNetworkSize);
             _map = new Dictionary<string, int>();
-            _emptyMatrixSlots = Enumerable.Range(0, nodeCount).ToList();
+            _emptyMatrixSlots = Enumerable
+                .Range(0, Settings.MaxNetworkSize)
+                .ToList();
         }
 
         public bool AddNode(string routerId)
