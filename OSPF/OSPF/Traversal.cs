@@ -6,57 +6,59 @@ namespace OSPF
     public class Traversal
     {
 
-        private static char seperator = ';';
+        private const char separator = ':';
 
-        // Dijkstra's algorithm to find shortest path from s to all other nodes
-        public static Dictionary<string, string> dijkstra(NetworkGraph G, string source)
+        public static Dictionary<string, string> Dijkstra(NetworkGraph graph, string source)
         {
-            string[] routers = G.Nodes.ToArray();
-            int[] dist = new int[routers.Length];
-            string[] queue = new string[routers.Length];
+            string[] routerIds = graph.Nodes.ToArray();
+            int[] distances = Enumerable
+                .Repeat(int.MaxValue, routerIds.Length)
+                .ToArray();
+            distances[routerIds.FirstIndex(id => id == source)] = 0;
+
+            string[] queue = graph.Nodes.ToArray();
+
             Dictionary<string, string> pred = new Dictionary<string, string>();
-            bool[] visited = new bool[routers.Length]; // all false initially
+            bool[] visited = new bool[routerIds.Length];
 
-            for (int i = 0; i < dist.Length; i++)
-            {
-                dist[i] = int.MaxValue;
-                queue[i] = routers[i];
-                if (routers[i].Equals(source))
-                {
-                    dist[i] = 0;
-                }
-            }
 
-            for (int i = 0; i < dist.Length; i++)
+
+            for (int i = 0; i < distances.Length; i++)
             {
-                int next = minVertex(dist, visited);
-                if (next != -1)
+                //susirandi artimiausią dabartiniam routeriui routerį
+                //tai iš pradžių next = 0, nes self dist = 0
+                int next = MinDistanceIndex(distances, visited);
+                if (next == -1)
+                    break;
+                visited[next] = true;
+                //susirenki "next" (kas yra smallest distance node'as) kaimynus
+                string[] neighbors = graph.GetNeighbors(routerIds[next]);
+                //eini per "next" kaimynus (tai pradedi nuo sellf)
+                for (int j = 0; j < neighbors.Length; j++)
                 {
-                    visited[next] = true;
-                    string[] neighbors = G.GetNeighbors(routers[next]);
-                    for (int j = 0; j < neighbors.Length; j++)
+                    //pasiimi 'next' kaimyno indexą
+                    int number = routerIds
+                        .FirstIndex(id => id == neighbors[j]);
+
+                    //d - bendra kaina/atstumas
+                    //gaunama paėmus atstumą nusigauti iki 
+                    //d + cost('next', kažkuris next kaimynas)
+                    int d = distances[next] + graph.GetCost(routerIds[next], routerIds[number]);
+                    //jeigu čia "pigiausias" būdas nusigauti iki to "next" kaimyno
+                    //tai įsimenam tą kainą
+                    //ir įsimenam koks pathas
+                    if (distances[number] > d)
                     {
-                        int nr = 0;
-                        for (int h = 0; h < routers.Length; h++)
-                        {
-                            if (routers[h].Equals(neighbors[j]))
-                            {
-                                nr = h;
-                            }
-                        }
-                        int d = dist[next] + G.GetCost(routers[next], routers[nr]);
-                        if (dist[nr] > d)
-                        {
-                            dist[nr] = d;
-                            queue[nr] = queue[next] + seperator + queue[nr];
-                        }
+                        distances[number] = d;
+                        queue[number] = queue[next] + separator + queue[number];
                     }
+
                 }
             }
 
             foreach (string str in queue)
             {
-                string[] parts = str.Split(seperator);
+                string[] parts = str.Split(separator);
                 if (parts.Length != 1)
                 {
                     pred[parts[parts.Length - 1]] = parts[1];
@@ -70,19 +72,19 @@ namespace OSPF
             return pred;
         }
 
-        private static int minVertex(int[] dist, bool[] v)
+        private static int MinDistanceIndex(int[] dist, bool[] visited)
         {
-            int x = int.MaxValue;
-            int y = -1;
+            int max = int.MaxValue;
+            int index = -1;
             for (int i = 0; i < dist.Length; i++)
             {
-                if (!v[i] && dist[i] < x)
+                if (!visited[i] && dist[i] < max)
                 {
-                    y = i;
-                    x = dist[i];
+                    index = i;
+                    max = dist[i];
                 }
             }
-            return y;
+            return index;
         }
 
     }

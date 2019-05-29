@@ -22,6 +22,14 @@ namespace OSPF
                 .Select(indexed => indexed.index);
         }
 
+        public static int FirstIndex<T>(this IEnumerable<T> enumeration, Func<T, bool> predicate)
+        {
+            return enumeration
+                .Select((elem, index) => new { elem, index })
+                .FirstOrDefault(indexed => predicate(indexed.elem))
+                .index;
+        }
+
         public static bool IsEmpty<T>(this IEnumerable<T> enumeration)
         {
             return !enumeration.Any();

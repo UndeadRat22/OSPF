@@ -85,7 +85,7 @@ namespace OSPF
             {
                 _packets.Add(packet.GetNumber());
                 Network = packet.GetNetwork();
-                Connections = Traversal.dijkstra(Network, Id);
+                Connections = Traversal.Dijkstra(Network, Id);
                 SendPacket(packet);
             }
         }
