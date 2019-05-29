@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace OSPF
 {
@@ -27,16 +28,9 @@ namespace OSPF
             }
         }
 
-        public string[] GetEdges()
+        public IEnumerable<string> GetEdges()
         {
-                string[] router = new string[map.Count];
-                int i = 0;
-                foreach (string @var in map.Keys)
-                {
-                    router[i] = @var;
-                    i++;
-                }
-                return router;
+            return map.Keys;
         }
 
         public bool AddEdge(string router)

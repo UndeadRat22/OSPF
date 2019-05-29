@@ -54,9 +54,9 @@ namespace OSPF
             ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
         }
 
-        private Packet GeneratePacket(Router router)
+        private Packet GeneratePacket(Router other)
         {
-            NetworkGraph secondNetwork = router.Network;
+            NetworkGraph secondNetwork = other.Network;
 
             foreach(string edge in secondNetwork.GetEdges())
             {
