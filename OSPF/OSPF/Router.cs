@@ -88,28 +88,23 @@ namespace OSPF
             SendPacket(packet);
         }
 
-        public void SendMessage(string destination, string data)
+        public bool SendMessage(string destination, string data, string path = "")
         {
-            Program.Write("Zinute '" + data + "' routeryje vardu - " + Id);
-            Thread.Sleep(Settings.NetworkDelayTime);
-            if (destination == Id)
+            path = $"{path}->{Id}";
+            Program.Write($"current path: {path}, data: {data}.");
+            if (Id == destination)
             {
-                Program.Write("Zinute '" + data + " pasieke norima routeri vardu - " + Id);
-                Program.Write(" ");
-            } else
-            {
-                Connections.TryGetValue(destination, out string sendTo);
-                if (sendTo == null)
-                    throw new ArgumentException($"Can't reach the given destination ({destination}) from {Id}");
-                foreach (Router router in Neighbors)
-                {
-                    if(sendTo != null && sendTo == router.Id)
-                    {
-                        router.SendMessage(destination, data);
-                        break;
-                    }
-                }
+                Program.Write("destination reached.");
+                return true;
             }
+            Connections.TryGetValue(destination, out string sendTo);
+            if (sendTo == null)
+                return false;
+            Program.Write($"Sending {data} to {sendTo}, final destination: {destination}");
+            Thread.Sleep(Settings.NetworkDelayTime);
+
+            Router next = Neighbors.FirstOrDefault(router => router.Id == sendTo);
+            return next.SendMessage(destination, data, path);
         }
     }
 }

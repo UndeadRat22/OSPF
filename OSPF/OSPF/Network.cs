@@ -108,8 +108,19 @@ namespace OSPF
             Router router = _routers.FirstOrDefault(r => r.Id == source);
             if (router == null)
                 throw new ArgumentException($"Given source router: {source} does not exist");
-
-            new Thread(() => router.SendMessage(destination, message)).Start();
+            try
+            {
+                var thread = new Thread(() => router.SendMessage(destination, message));
+                thread.Start();
+                while (thread.ThreadState == ThreadState.Running)
+                {
+                    Thread.Sleep(50);
+                }
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }
