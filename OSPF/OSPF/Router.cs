@@ -64,7 +64,7 @@ namespace OSPF
                 foreach(string neighbor in secondNetwork.getNeighbors(edge))
                 {
                     Network.AddEdge(neighbor);
-                    Network.SetLink(edge, neighbor, secondNetwork.getWeight(edge, neighbor));
+                    Network.SetLink(edge, neighbor, secondNetwork.getCost(edge, neighbor));
                 }
             }
 

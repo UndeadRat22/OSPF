@@ -42,7 +42,7 @@ namespace OSPF
                                 nr = h;
                             }
                         }
-                        int d = dist[next] + G.getWeight(routers[next], routers[nr]);
+                        int d = dist[next] + G.getCost(routers[next], routers[nr]);
                         if (dist[nr] > d)
                         {
                             dist[nr] = d;
