@@ -11,85 +11,72 @@ namespace OSPF
     public class Router
     {
         public string Id { get; private set; }
-        private Dictionary<string, string> connections;
-        private List<Router> neighbors;
-        private NetworkGraph network;
+        public Dictionary<string, string> Connections { get; private set; }
+        public List<Router> Neighbors { get; private set; }
+        public NetworkGraph Network { get; private set; }
         private List<int> packets;
 
         public Router(string id)
         {
             Id = id;
-            neighbors = new List<Router>();
+            Neighbors = new List<Router>();
             packets = new List<int>();
-            network = new NetworkGraph(15); //kiek routeriu norim
-            network.addEdge(id);
-            connections = new Dictionary<string, string>();
-            connections.Add(id, id);
-        }
-
-        public Dictionary<string, string> GetList()
-        {
-            return connections;
+            Network = new NetworkGraph(15); //kiek routeriu norim
+            Network.addEdge(id);
+            Connections = new Dictionary<string, string>
+            {
+                {id, id }
+            };
         }
 
         private void AddNeighbor(Router router)
         {
-            neighbors.Add(router);
-        }
-
-        public Router[] GetNeighbors()
-        {
-            return neighbors.ToArray();
-        }
-
-        public NetworkGraph GetNetwork()
-        {
-            return network;
+            Neighbors.Add(router);
         }
 
         public void AddLink(Router router, int weight)
         {
-            neighbors.Add(router);
+            Neighbors.Add(router);
             router.AddNeighbor(this);
-            network.addEdge(router.Id);
-            network.setLink(Id, router.Id, weight);
+            Network.addEdge(router.Id);
+            Network.setLink(Id, router.Id, weight);
             ReceivePacket(GeneratePacket(router));
         }
 
         public void RemoveLink(Router router)
         {
-            neighbors.Remove(router);
-            network.removeLink(Id, router.Id);
-            ReceivePacket(new Packet(Packet.GetCounter(), Id, network));
+            Neighbors.Remove(router);
+            Network.removeLink(Id, router.Id);
+            ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
         }
 
         public void RemoveRouter(Router router)
         {
-            neighbors.Remove(router);
-            network.removeEdge(router.Id);
-            ReceivePacket(new Packet(Packet.GetCounter(), Id, network));
+            Neighbors.Remove(router);
+            Network.removeEdge(router.Id);
+            ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
         }
 
         private Packet GeneratePacket(Router router)
         {
-            NetworkGraph secondNetwork = router.GetNetwork();
+            NetworkGraph secondNetwork = router.Network;
 
             foreach(string edge in secondNetwork.getEdges())
             {
-                network.addEdge(edge);
+                Network.addEdge(edge);
                 foreach(string neighbor in secondNetwork.getNeighbors(edge))
                 {
-                    network.addEdge(neighbor);
-                    network.setLink(edge, neighbor, secondNetwork.getWeight(edge, neighbor));
+                    Network.addEdge(neighbor);
+                    Network.setLink(edge, neighbor, secondNetwork.getWeight(edge, neighbor));
                 }
             }
 
-            return new Packet(Packet.GetCounter(), Id, network);
+            return new Packet(Packet.GetCounter(), Id, Network);
         }
 
         private void SendPacket(Packet packet)
         {
-            foreach (Router router in neighbors)
+            foreach (Router router in Neighbors)
             {
                 router.ReceivePacket(packet);
             }
@@ -100,8 +87,8 @@ namespace OSPF
             if (!packets.Contains(packet.GetNumber()))
             {
                 packets.Add(packet.GetNumber());
-                network = packet.GetNetwork();
-                connections = Traversal.dijkstra(network, Id);
+                Network = packet.GetNetwork();
+                Connections = Traversal.dijkstra(Network, Id);
                 SendPacket(packet);
             }
         }
@@ -117,8 +104,8 @@ namespace OSPF
             } else
             {
                 string sendTo;
-                connections.TryGetValue(dest, out sendTo);
-                foreach(Router router in neighbors)
+                Connections.TryGetValue(dest, out sendTo);
+                foreach(Router router in Neighbors)
                 {
                     if(sendTo != null && sendTo == router.Id)
                     {

@@ -14,12 +14,16 @@ namespace OSPF
         {
             routers = new List<Router>();
         }
-
-        public Dictionary<string, string> GetConnections(string source)
+        /// <summary>
+        /// Returns the connections dictionary for a given router Id
+        /// </summary>
+        /// <param name="routerId"></param>
+        /// <returns></returns>
+        public Dictionary<string, string> GetConnections(string routerId)
         {
             return routers
-                .FirstOrDefault(r => r.Id == source)
-                ?.GetList();
+                .FirstOrDefault(r => r.Id == routerId)
+                ?.Connections;
         }
 
         /// <summary>
@@ -35,6 +39,11 @@ namespace OSPF
             return true;
         }
 
+        /// <summary>
+        /// Finds a router, removes it from the routing tables of all it's neighbors
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>If could find a router by given id</returns>
         public bool RemoveRouter(string id)
         {
             Router router = routers
@@ -42,7 +51,7 @@ namespace OSPF
             if (router == null)
                 return false;
             
-            router.GetNeighbors()
+            router.Neighbors
                 .ForEach(neighbor => neighbor.RemoveRouter(router));
 
             routers.Remove(router);
@@ -50,46 +59,50 @@ namespace OSPF
             return true;
         }
 
-        public virtual bool AddLink(string source, string dest, int weight)
+        /// <summary>
+        /// Adds a link from source -> destination
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <param name="cost"></param>
+        /// <returns></returns>
+        public bool AddLink(string source, string destination, int cost)
         {
-            foreach (Router router1 in routers)
-            {
-                if (source.Equals(router1.Id))
-                {
-                    foreach (Router router2 in routers)
-                    {
-                        if (dest.Equals(router2.Id))
-                        {
-                            router1.AddLink(router2, weight);
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
+            Router first = routers
+                .FirstOrDefault(r => r.Id == source);
+            Router second = routers
+                .FirstOrDefault(r => r.Id == destination);
+
+            if (first == null || second == null)
+                return false;
+
+            first.AddLink(second, cost);
+            return true;
         }
 
-        public virtual bool RemoveLink(string source, string dest)
+        /// <summary>
+        /// Removes source -> destination and destination -> source
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <returns></returns>
+        public bool RemoveLink(string source, string destination)
         {
-            foreach (Router router1 in routers)
-            {
-                if (source.Equals(router1.Id))
-                {
-                    foreach (Router router2 in routers)
-                    {
-                        if (dest.Equals(router2.Id))
-                        {
-                            router1.RemoveLink(router2);
-                            router2.RemoveLink(router1);
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
+            Router first = routers
+                .FirstOrDefault(r => r.Id == source);
+            Router second = routers
+                .FirstOrDefault(r => r.Id == destination);
+
+            if (first == null || second == null)
+                return false;
+
+            first.RemoveLink(second);
+            second.RemoveLink(first);
+
+            return true;
         }
 
-        public virtual bool SendMessage(string source, string dest, string message)
+        public bool SendMessage(string source, string destination, string message)
         {
             foreach (Router router in routers)
             {
@@ -99,7 +112,7 @@ namespace OSPF
                     Message msg = new Message
                     {
                         Router = router,
-                        Destination = dest,
+                        Destination = destination,
                         Data = message
                     };
                     Thread thread = new Thread(msg.Send);
