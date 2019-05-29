@@ -102,25 +102,27 @@ namespace OSPF
             return true;
         }
 
+        /// <summary>
+        /// Sends a message from source to destination
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <param name="message"></param>
+        /// <returns>if could find source</returns>
         public bool SendMessage(string source, string destination, string message)
         {
-            foreach (Router router in routers)
+            Router router = routers.FirstOrDefault(r => r.Id == source);
+            if (router == null)
+                return false;
+            Message msg = new Message
             {
-                //jeigu source == routerid -> reiškia iš šito routerio reikia išsiųst
-                if (source.Equals(router.Id))
-                {
-                    Message msg = new Message
-                    {
-                        Router = router,
-                        Destination = destination,
-                        Data = message
-                    };
-                    Thread thread = new Thread(msg.Send);
-                    thread.Start();
-                    return true;
-                }
-            }
-            return false;
+                Router = router,
+                Destination = destination,
+                Data = message
+            };
+            Thread thread = new Thread(msg.Send);
+            thread.Start();
+            return true;
         }
     }
 }

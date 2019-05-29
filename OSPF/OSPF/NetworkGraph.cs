@@ -46,7 +46,7 @@ namespace OSPF
                 return router;
         }
 
-        public virtual bool addEdge(string router)
+        public virtual bool AddEdge(string router)
         {
             int index;
             if (map.ContainsKey(router))
@@ -68,7 +68,7 @@ namespace OSPF
             return true;
         }
 
-        public virtual bool removeEdge(string router)
+        public virtual bool RemoveEdge(string router)
         {
             int index;
             if (map.ContainsKey(router))
@@ -89,12 +89,12 @@ namespace OSPF
             }
         }
 
-        public virtual bool setLink(string source, string dest, int weight)
+        public virtual bool SetLink(string source, string dest, int cost)
         {
             if (map.ContainsKey(source) && map.ContainsKey(dest))
             {
-                edges[map[source]][map[dest]] = weight;
-                edges[map[dest]][map[source]] = weight;
+                edges[map[source]][map[dest]] = cost;
+                edges[map[dest]][map[source]] = cost;
                 return true;
             }
             else

@@ -14,32 +14,29 @@ namespace OSPF
         public Dictionary<string, string> Connections { get; private set; }
         public List<Router> Neighbors { get; private set; }
         public NetworkGraph Network { get; private set; }
-        private List<int> packets;
+        private List<int> _packets;
 
         public Router(string id)
         {
             Id = id;
             Neighbors = new List<Router>();
-            packets = new List<int>();
+            _packets = new List<int>();
             Network = new NetworkGraph(15); //kiek routeriu norim
-            Network.addEdge(id);
+            Network.AddEdge(id);
             Connections = new Dictionary<string, string>
             {
                 {id, id }
             };
         }
 
-        private void AddNeighbor(Router router)
+        public void AddLink(Router router, int cost)
         {
             Neighbors.Add(router);
-        }
+            router.Neighbors.Add(this);
 
-        public void AddLink(Router router, int weight)
-        {
-            Neighbors.Add(router);
-            router.AddNeighbor(this);
-            Network.addEdge(router.Id);
-            Network.setLink(Id, router.Id, weight);
+            Network.AddEdge(router.Id);
+            Network.SetLink(Id, router.Id, cost);
+
             ReceivePacket(GeneratePacket(router));
         }
 
@@ -53,7 +50,7 @@ namespace OSPF
         public void RemoveRouter(Router router)
         {
             Neighbors.Remove(router);
-            Network.removeEdge(router.Id);
+            Network.RemoveEdge(router.Id);
             ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
         }
 
@@ -63,11 +60,11 @@ namespace OSPF
 
             foreach(string edge in secondNetwork.getEdges())
             {
-                Network.addEdge(edge);
+                Network.AddEdge(edge);
                 foreach(string neighbor in secondNetwork.getNeighbors(edge))
                 {
-                    Network.addEdge(neighbor);
-                    Network.setLink(edge, neighbor, secondNetwork.getWeight(edge, neighbor));
+                    Network.AddEdge(neighbor);
+                    Network.SetLink(edge, neighbor, secondNetwork.getWeight(edge, neighbor));
                 }
             }
 
@@ -84,9 +81,9 @@ namespace OSPF
 
         public void ReceivePacket(Packet packet)
         {
-            if (!packets.Contains(packet.GetNumber()))
+            if (!_packets.Contains(packet.GetNumber()))
             {
-                packets.Add(packet.GetNumber());
+                _packets.Add(packet.GetNumber());
                 Network = packet.GetNetwork();
                 Connections = Traversal.dijkstra(Network, Id);
                 SendPacket(packet);
