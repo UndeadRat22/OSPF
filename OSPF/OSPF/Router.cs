@@ -22,7 +22,7 @@ namespace OSPF
             Neighbors = new List<Router>();
             _packets = new List<int>();
             Network = new NetworkGraph(15); //kiek routeriu norim
-            Network.AddEdge(id);
+            Network.AddNode(id);
             Connections = new Dictionary<string, string>
             {
                 {id, id }
@@ -34,7 +34,7 @@ namespace OSPF
             Neighbors.Add(router);
             router.Neighbors.Add(this);
 
-            Network.AddEdge(router.Id);
+            Network.AddNode(router.Id);
             Network.SetLink(Id, router.Id, cost);
 
             ReceivePacket(GeneratePacket(router));
@@ -50,7 +50,7 @@ namespace OSPF
         public void RemoveRouter(Router router)
         {
             Neighbors.Remove(router);
-            Network.RemoveEdge(router.Id);
+            Network.RemoveNode(router.Id);
             ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
         }
 
@@ -58,12 +58,12 @@ namespace OSPF
         {
             NetworkGraph secondNetwork = other.Network;
 
-            foreach(string edge in secondNetwork.GetEdges())
+            foreach(string edge in secondNetwork.Nodes)
             {
-                Network.AddEdge(edge);
+                Network.AddNode(edge);
                 foreach(string neighbor in secondNetwork.GetNeighbors(edge))
                 {
-                    Network.AddEdge(neighbor);
+                    Network.AddNode(neighbor);
                     Network.SetLink(edge, neighbor, secondNetwork.GetCost(edge, neighbor));
                 }
             }

@@ -11,7 +11,7 @@ namespace OSPF
         // Dijkstra's algorithm to find shortest path from s to all other nodes
         public static Dictionary<string, string> dijkstra(NetworkGraph G, string source)
         {
-            string[] routers = G.GetEdges().ToArray();
+            string[] routers = G.Nodes.ToArray();
             int[] dist = new int[routers.Length];
             string[] queue = new string[routers.Length];
             Dictionary<string, string> pred = new Dictionary<string, string>();

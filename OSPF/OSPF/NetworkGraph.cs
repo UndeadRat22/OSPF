@@ -6,111 +6,86 @@ namespace OSPF
     public class NetworkGraph
     {
 
-        private int[][] edges;
-        private IDictionary<string, int> map;
-        private LinkedList<int> freeCells;
-        private int freeIndex;
+        private int[][] _networkNodes;
+        private IDictionary<string, int> _map;
+        private List<int> _emptyMatrixSlots;
+
+        public IEnumerable<string> Nodes { get { return _map.Keys; } }
 
         public NetworkGraph(int routerCount)
         {
-            freeIndex = 0;
-            edges = Utility.Matrix(routerCount);
-            map = new Dictionary<string, int>();
-            freeCells = new LinkedList<int>();
-
+            _networkNodes = Utility.Matrix(routerCount);
+            _map = new Dictionary<string, int>();
+            _emptyMatrixSlots = Enumerable.Range(0, routerCount).ToList();
         }
 
-        public int Size
+        public bool AddNode(string routerId)
         {
-            get
-            {
-                return map.Count;
-            }
-        }
-
-        public IEnumerable<string> GetEdges()
-        {
-            return map.Keys;
-        }
-
-        public bool AddEdge(string routerId)
-        {
-            if (map.ContainsKey(routerId))
+            if (_map.ContainsKey(routerId) || _emptyMatrixSlots.IsEmpty())
                 return false;
 
-            int index;
-            if (freeCells.Count == 0)
-            {
-                index = freeIndex;
-                map[routerId] = index;
-                freeIndex++;
-            }
-            else
-            {
-                index = freeCells.First.Value;
-                freeCells.RemoveFirst();
-                map[routerId] = index;
-            }
+            int matrixIndex = _emptyMatrixSlots.First();
+            _emptyMatrixSlots.RemoveAt(0);
+            _map[routerId] = matrixIndex;
+
             return true;
         }
 
-        public bool RemoveEdge(string router)
+        public bool RemoveNode(string router)
         {
-            int index;
-            if (!map.ContainsKey(router))
+            if (!_map.ContainsKey(router))
                 return false;
-            map.TryGetValue(router, out index);
-            map.Remove(router);
-            freeCells.AddLast(index);
-            for (int i = 0; i < edges[index].Length; i++)
+
+            _map.TryGetValue(router, out int index);
+            _map.Remove(router);
+            _emptyMatrixSlots.Add(index);
+            for (int i = 0; i < _networkNodes[index].Length; i++)
             {
-                edges[index][i] = 0;
-                edges[i][index] = 0;
+                _networkNodes[index][i] = 0;
+                _networkNodes[i][index] = 0;
             }
             return true;
         }
 
         public bool SetLink(string first, string second, int cost)
         {
-            if (!map.ContainsKey(first) || !map.ContainsKey(second))
+            if (!_map.ContainsKey(first) || !_map.ContainsKey(second))
                 return false;
 
-            edges[map[first]][map[second]] = cost;
-            edges[map[second]][map[first]] = cost;
+            _networkNodes[_map[first]][_map[second]] = cost;
+            _networkNodes[_map[second]][_map[first]] = cost;
 
             return true;
         }
 
         public bool RemoveLink(string first, string second)
         {
-            if (!map.ContainsKey(first) || !map.ContainsKey(second))
+            if (!_map.ContainsKey(first) || !_map.ContainsKey(second))
                 return false;
-            edges[map[first]][map[second]] = 0;
-            edges[map[second]][map[first]] = 0;
+            _networkNodes[_map[first]][_map[second]] = 0;
+            _networkNodes[_map[second]][_map[first]] = 0;
             return true;
         }
 
         public int GetCost(string first, string second)
         {
-            if (!map.ContainsKey(first) || !map.ContainsKey(second))
+            if (!_map.ContainsKey(first) || !_map.ContainsKey(second))
                 return -1;
 
-            return edges[map[first]][map[second]];
+            return _networkNodes[_map[first]][_map[second]];
         }
 
         public string[] GetNeighbors(string routerId)
         {
-            if (!map.ContainsKey(routerId))
+            if (!_map.ContainsKey(routerId))
                 return null;
+            _map.TryGetValue(routerId, out int matrixIndex);
 
-            int matrixIndex;
-            map.TryGetValue(routerId, out matrixIndex);
-
-            var numbers = edges[matrixIndex]
+            var numbers = _networkNodes[matrixIndex]
                 .IndicesWhere(edge => edge > 0);
 
-            string[] neigbors = map.Keys
-                .Where(key => numbers.Contains(map[key]))
+            string[] neigbors = _map.Keys
+                .Where(key => numbers.Contains(_map[key]))
                 .ToArray();
             return neigbors;
 

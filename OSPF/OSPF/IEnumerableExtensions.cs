@@ -21,5 +21,10 @@ namespace OSPF
                 .Where(indexed => predicate(indexed.elem))
                 .Select(indexed => indexed.index);
         }
+
+        public static bool IsEmpty<T>(this IEnumerable<T> enumeration)
+        {
+            return !enumeration.Any();
+        }
     }
 }

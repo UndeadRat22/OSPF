@@ -8,11 +8,11 @@ namespace OSPF
     public class Network
     {
 
-        private List<Router> routers;
+        private List<Router> _routers;
 
         public Network()
         {
-            routers = new List<Router>();
+            _routers = new List<Router>();
         }
         /// <summary>
         /// Returns the connections dictionary for a given router Id
@@ -21,7 +21,7 @@ namespace OSPF
         /// <returns></returns>
         public Dictionary<string, string> GetConnections(string routerId)
         {
-            return routers
+            return _routers
                 .FirstOrDefault(r => r.Id == routerId)
                 ?.Connections;
         }
@@ -33,9 +33,9 @@ namespace OSPF
         /// <returns></returns>
         public bool AddRouter(string id)
         {
-            if (routers.Any(router => router.Id == id))
+            if (_routers.Any(router => router.Id == id))
                 return false;
-            routers.Add(new Router(id));
+            _routers.Add(new Router(id));
             return true;
         }
 
@@ -46,7 +46,7 @@ namespace OSPF
         /// <returns>If could find a router by given id</returns>
         public bool RemoveRouter(string id)
         {
-            Router router = routers
+            Router router = _routers
                 .FirstOrDefault(r => r.Id == id);
             if (router == null)
                 return false;
@@ -54,7 +54,7 @@ namespace OSPF
             router.Neighbors
                 .ForEach(neighbor => neighbor.RemoveRouter(router));
 
-            routers.Remove(router);
+            _routers.Remove(router);
 
             return true;
         }
@@ -68,9 +68,9 @@ namespace OSPF
         /// <returns></returns>
         public bool AddLink(string source, string destination, int cost)
         {
-            Router first = routers
+            Router first = _routers
                 .FirstOrDefault(r => r.Id == source);
-            Router second = routers
+            Router second = _routers
                 .FirstOrDefault(r => r.Id == destination);
 
             if (first == null || second == null)
@@ -88,9 +88,9 @@ namespace OSPF
         /// <returns></returns>
         public bool RemoveLink(string source, string destination)
         {
-            Router first = routers
+            Router first = _routers
                 .FirstOrDefault(r => r.Id == source);
-            Router second = routers
+            Router second = _routers
                 .FirstOrDefault(r => r.Id == destination);
 
             if (first == null || second == null)
@@ -111,7 +111,7 @@ namespace OSPF
         /// <returns>if could find source</returns>
         public bool SendMessage(string source, string destination, string message)
         {
-            Router router = routers.FirstOrDefault(r => r.Id == source);
+            Router router = _routers.FirstOrDefault(r => r.Id == source);
             if (router == null)
                 return false;
             Message msg = new Message
