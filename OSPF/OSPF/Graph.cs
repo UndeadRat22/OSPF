@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace OSPF
 {
-    public class NetworkGraph
+    public class Graph
     {
 
         private int[][] _networkNodes;
@@ -12,11 +12,11 @@ namespace OSPF
 
         public IEnumerable<string> Nodes { get { return _map.Keys; } }
 
-        public NetworkGraph(int routerCount)
+        public Graph(int nodeCount)
         {
-            _networkNodes = Utility.Matrix(routerCount);
+            _networkNodes = Utility.Matrix(nodeCount);
             _map = new Dictionary<string, int>();
-            _emptyMatrixSlots = Enumerable.Range(0, routerCount).ToList();
+            _emptyMatrixSlots = Enumerable.Range(0, nodeCount).ToList();
         }
 
         public bool AddNode(string routerId)

@@ -8,7 +8,7 @@ namespace OSPF
 
         private const char separator = ':';
 
-        public static Dictionary<string, string> Dijkstra(NetworkGraph graph, string source)
+        public static Dictionary<string, string> Dijkstra(Graph graph, string source)
         {
             string[] routerIds = graph.Nodes.ToArray();
             int[] distances = Enumerable

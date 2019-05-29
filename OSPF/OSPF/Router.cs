@@ -13,7 +13,7 @@ namespace OSPF
         public string Id { get; private set; }
         public Dictionary<string, string> Connections { get; private set; }
         public List<Router> Neighbors { get; private set; }
-        public NetworkGraph Network { get; private set; }
+        public Graph Network { get; private set; }
         private List<int> _packets;
 
         public Router(string id)
@@ -21,7 +21,7 @@ namespace OSPF
             Id = id;
             Neighbors = new List<Router>();
             _packets = new List<int>();
-            Network = new NetworkGraph(15); //kiek routeriu norim
+            Network = new Graph(16);
             Network.AddNode(id);
             Connections = new Dictionary<string, string>
             {
@@ -37,57 +37,55 @@ namespace OSPF
             Network.AddNode(router.Id);
             Network.SetLink(Id, router.Id, cost);
 
-            ReceivePacket(GeneratePacket(router));
+            var update = UpdateNetwork(router);
+            ReceiveUpdate(update);
         }
 
         public void RemoveLink(Router router)
         {
             Neighbors.Remove(router);
             Network.RemoveLink(Id, router.Id);
-            ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
+            ReceiveUpdate(new Update(Update.Counter, Id, Network));
         }
 
         public void RemoveRouter(Router router)
         {
             Neighbors.Remove(router);
             Network.RemoveNode(router.Id);
-            ReceivePacket(new Packet(Packet.GetCounter(), Id, Network));
+            ReceiveUpdate(new Update(Update.Counter, Id, Network));
         }
 
-        private Packet GeneratePacket(Router other)
+        private Update UpdateNetwork(Router other)
         {
-            NetworkGraph secondNetwork = other.Network;
+            Graph otherNetwork = other.Network;
 
-            foreach(string edge in secondNetwork.Nodes)
+            foreach(string routerId in otherNetwork.Nodes)
             {
-                Network.AddNode(edge);
-                foreach(string neighbor in secondNetwork.GetNeighbors(edge))
+                Network.AddNode(routerId);
+                foreach(string neighbor in otherNetwork.GetNeighbors(routerId))
                 {
                     Network.AddNode(neighbor);
-                    Network.SetLink(edge, neighbor, secondNetwork.GetCost(edge, neighbor));
+                    Network.SetLink(routerId, neighbor, otherNetwork.GetCost(routerId, neighbor));
                 }
             }
 
-            return new Packet(Packet.GetCounter(), Id, Network);
+            return new Update(Update.Counter, Id, Network);
         }
 
-        private void SendPacket(Packet packet)
+        private void SendPacket(Update packet)
         {
-            foreach (Router router in Neighbors)
-            {
-                router.ReceivePacket(packet);
-            }
+            Neighbors
+                .ForEach(neighbor => neighbor.ReceiveUpdate(packet));
         }
 
-        public void ReceivePacket(Packet packet)
+        public void ReceiveUpdate(Update packet)
         {
-            if (!_packets.Contains(packet.GetNumber()))
-            {
-                _packets.Add(packet.GetNumber());
-                Network = packet.GetNetwork();
-                Connections = Traversal.Dijkstra(Network, Id);
-                SendPacket(packet);
-            }
+            if (_packets.Contains(packet.Number))
+                return;
+            _packets.Add(packet.Number);
+            Network = packet.Network;
+            Connections = Traversal.Dijkstra(Network, Id);
+            SendPacket(packet);
         }
 
         public void SendMessage(string destination, string data)
@@ -100,8 +98,6 @@ namespace OSPF
                 Program.Write(" ");
             } else
             {
-                //sendTo => kam reikia siųsti message'ą kad šis persiųstų arčiau
-                //destinationso
                 Connections.TryGetValue(destination, out string sendTo);
                 if (sendTo == null)
                     throw new ArgumentException($"Can't reach the given destination ({destination}) from {Id}");
