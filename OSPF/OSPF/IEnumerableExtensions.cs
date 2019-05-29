@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OSPF
 {
@@ -11,6 +12,14 @@ namespace OSPF
             {
                 action(item);
             }
+        }
+
+        public static IEnumerable<int> IndicesWhere<T>(this IEnumerable<T> enumeration, Func<T, bool> predicate)
+        {
+            return enumeration
+                .Select((elem, index) => new { elem, index })
+                .Where(indexed => predicate(indexed.elem))
+                .Select(indexed => indexed.index);
         }
     }
 }

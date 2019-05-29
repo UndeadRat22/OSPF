@@ -20,7 +20,7 @@ namespace OSPF
 
         }
 
-        public virtual int Size
+        public int Size
         {
             get
             {
@@ -103,15 +103,11 @@ namespace OSPF
             if (!map.ContainsKey(routerId))
                 return null;
 
-            int index;
-            map.TryGetValue(routerId, out index);
+            int matrixIndex;
+            map.TryGetValue(routerId, out matrixIndex);
 
-            var numbers = new List<int>();
-            for (int i = 0; i < edges.Length; i++)
-            {
-                if (edges[index][i] > 0)
-                    numbers.Add(i);
-            }
+            var numbers = edges[matrixIndex]
+                .IndicesWhere(edge => edge > 0);
 
             string[] neigbors = map.Keys
                 .Where(key => numbers.Contains(map[key]))
