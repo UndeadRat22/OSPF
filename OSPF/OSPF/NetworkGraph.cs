@@ -11,10 +11,10 @@ namespace OSPF
         private LinkedList<int> freeCells;
         private int freeIndex;
 
-        public NetworkGraph(int maxRouters)
+        public NetworkGraph(int routerCount)
         {
             freeIndex = 0;
-            edges = RectangularArrays.ReturnRectangularIntArray(maxRouters, maxRouters);
+            edges = Utility.Matrix(routerCount);
             map = new Dictionary<string, int>();
             freeCells = new LinkedList<int>();
 
@@ -33,24 +33,23 @@ namespace OSPF
             return map.Keys;
         }
 
-        public bool AddEdge(string router)
+        public bool AddEdge(string routerId)
         {
-            int index;
-            if (map.ContainsKey(router))
-            {
+            if (map.ContainsKey(routerId))
                 return false;
-            }
+
+            int index;
             if (freeCells.Count == 0)
             {
                 index = freeIndex;
-                map[router] = index;
+                map[routerId] = index;
                 freeIndex++;
             }
             else
             {
                 index = freeCells.First.Value;
                 freeCells.RemoveFirst();
-                map[router] = index;
+                map[routerId] = index;
             }
             return true;
         }
@@ -58,108 +57,67 @@ namespace OSPF
         public bool RemoveEdge(string router)
         {
             int index;
-            if (map.ContainsKey(router))
-            {
-                map.TryGetValue(router, out index);
-                map.Remove(router);
-                freeCells.AddLast(index);
-                for (int i = 0; i < edges[index].Length; i++)
-                {
-                    edges[index][i] = 0;
-                    edges[i][index] = 0;
-                }
-                return true;
-            }
-            else
-            {
+            if (!map.ContainsKey(router))
                 return false;
+            map.TryGetValue(router, out index);
+            map.Remove(router);
+            freeCells.AddLast(index);
+            for (int i = 0; i < edges[index].Length; i++)
+            {
+                edges[index][i] = 0;
+                edges[i][index] = 0;
             }
+            return true;
         }
 
-        public bool SetLink(string source, string dest, int cost)
+        public bool SetLink(string first, string second, int cost)
         {
-            if (map.ContainsKey(source) && map.ContainsKey(dest))
-            {
-                edges[map[source]][map[dest]] = cost;
-                edges[map[dest]][map[source]] = cost;
-                return true;
-            }
-            else
-            {
+            if (!map.ContainsKey(first) || !map.ContainsKey(second))
                 return false;
-            }
+
+            edges[map[first]][map[second]] = cost;
+            edges[map[second]][map[first]] = cost;
+
+            return true;
         }
 
-        public bool RemoveLink(string source, string dest)
+        public bool RemoveLink(string first, string second)
         {
-            if (map.ContainsKey(source) && map.ContainsKey(dest))
-            {
-                edges[map[source]][map[dest]] = 0;
-                edges[map[dest]][map[source]] = 0;
-                return true;
-            }
-            else
-            {
+            if (!map.ContainsKey(first) || !map.ContainsKey(second))
                 return false;
-            }
+            edges[map[first]][map[second]] = 0;
+            edges[map[second]][map[first]] = 0;
+            return true;
         }
 
-        public int GetCost(string source, string dest)
+        public int GetCost(string first, string second)
         {
-            if (map.ContainsKey(source) && map.ContainsKey(dest))
-            {
-                return edges[map[source]][map[dest]];
-            }
-            else
-            {
+            if (!map.ContainsKey(first) || !map.ContainsKey(second))
                 return -1;
-            }
+
+            return edges[map[first]][map[second]];
         }
 
-        public string[] GetNeighbors(string router)
+        public string[] GetNeighbors(string routerId)
         {
-            int[] numbers;
-            string[] neighbors;
-            if (map.ContainsKey(router))
-            {
-                int count = 0;
-                int index;
-                map.TryGetValue(router, out index);
-                for (int i = 0; i < edges.Length; i++)
-                {
-                    if (edges[index][i] > 0)
-                    {
-                        count++;
-                    }
-                }
-                numbers = new int[count];
-                neighbors = new string[count];
-                count = 0;
-                for (int i = 0; i < edges.Length; i++)
-                {
-                    if (edges[index][i] > 0)
-                    {
-                        numbers[count++] = i;
-                    }
-                }
-                count = 0;
-                foreach (string id in map.Keys)
-                {
-                    for (int i = 0; i < numbers.Length; i++)
-                    {
-                        if (numbers[i] == map[id])
-                        {
-                            neighbors[count++] = id;
-                            break;
-                        }
-                    }
-                }
-                return neighbors;
-            }
-            else
-            {
+            if (!map.ContainsKey(routerId))
                 return null;
+
+            int index;
+            map.TryGetValue(routerId, out index);
+
+            var numbers = new List<int>();
+            for (int i = 0; i < edges.Length; i++)
+            {
+                if (edges[index][i] > 0)
+                    numbers.Add(i);
             }
+
+            string[] neigbors = map.Keys
+                .Where(key => numbers.Contains(map[key]))
+                .ToArray();
+            return neigbors;
+
         }
     }
 }
