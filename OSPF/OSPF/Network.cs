@@ -26,6 +26,11 @@ namespace OSPF
                 ?.Connections;
         }
 
+        public bool RouterExists(string id)
+        {
+            return _routers.Any(router => router.Id == id);
+        }
+
         /// <summary>
         /// Checks if a router exists, if not, adds to network
         /// </summary>
@@ -101,21 +106,22 @@ namespace OSPF
         /// </summary>
         /// <param name="source"></param>
         /// <param name="destination"></param>
-        /// <param name="message"></param>
+        /// <param name="data"></param>
         /// <returns>if could find source</returns>
-        public void SendMessage(string source, string destination, string message)
+        public void TransferData(string source, string destination, string data)
         {
             Router router = _routers.FirstOrDefault(r => r.Id == source);
             if (router == null)
                 throw new ArgumentException($"Given source router: {source} does not exist");
             try
             {
-                var thread = new Thread(() => router.SendMessage(destination, message));
+                /*var thread = new Thread(() => router.SendData(destination, data));
                 thread.Start();
                 while (thread.ThreadState == ThreadState.Running)
                 {
                     Thread.Sleep(50);
-                }
+                }*/
+                router.SendData(destination, data);
             }
             catch
             {

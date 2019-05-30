@@ -14,19 +14,19 @@ namespace OSPF
         public Dictionary<string, string> Connections { get; private set; }
         public List<Router> Neighbors { get; private set; }
         public Graph Network { get; private set; }
-        private List<int> _packets;
+        private List<int> _updates;
 
         public Router(string id)
         {
             Id = id;
             Neighbors = new List<Router>();
-            _packets = new List<int>();
             Network = new Graph();
             Network.AddNode(id);
             Connections = new Dictionary<string, string>
             {
                 {id, id }
             };
+            _updates = new List<int>();
         }
 
         public void AddLink(Router router, int cost)
@@ -37,7 +37,7 @@ namespace OSPF
             Network.AddNode(router.Id);
             Network.SetLink(Id, router.Id, cost);
 
-            var update = UpdateNetwork(router);
+            var update = CreateUpdate(router);
             ReceiveUpdate(update);
         }
 
@@ -55,7 +55,7 @@ namespace OSPF
             ReceiveUpdate(new Update(Update.Counter, Id, Network));
         }
 
-        private Update UpdateNetwork(Router other)
+        private Update CreateUpdate(Router other)
         {
             Graph otherNetwork = other.Network;
 
@@ -72,7 +72,7 @@ namespace OSPF
             return new Update(Update.Counter, Id, Network);
         }
 
-        private void SendPacket(Update packet)
+        private void BroadcastUpdate(Update packet)
         {
             Neighbors
                 .ForEach(neighbor => neighbor.ReceiveUpdate(packet));
@@ -80,31 +80,31 @@ namespace OSPF
 
         public void ReceiveUpdate(Update packet)
         {
-            if (_packets.Contains(packet.Number))
+            if (_updates.Contains(packet.Number))
                 return;
-            _packets.Add(packet.Number);
+            _updates.Add(packet.Number);
             Network = packet.Network;
             Connections = Traversal.Dijkstra(Network, Id);
-            SendPacket(packet);
+            BroadcastUpdate(packet);
         }
 
-        public bool SendMessage(string destination, string data, string path = "")
+        public bool SendData(string destination, string data, string path = "")
         {
             path = $"{path}->{Id}";
-            Program.Write($"current path: {path}, data: {data}.");
+            Console.WriteLine($"current path: {path}, data: {data}.");
             if (Id == destination)
             {
-                Program.Write("destination reached.");
+                Console.WriteLine("destination reached.");
                 return true;
             }
             Connections.TryGetValue(destination, out string sendTo);
             if (sendTo == null)
                 return false;
-            Program.Write($"Sending {data} to {sendTo}, final destination: {destination}");
+            Console.WriteLine($"Sending {data} to {sendTo}, final destination: {destination}");
             Thread.Sleep(Settings.NetworkDelayTime);
 
             Router next = Neighbors.FirstOrDefault(router => router.Id == sendTo);
-            return next.SendMessage(destination, data, path);
+            return next.SendData(destination, data, path);
         }
     }
 }

@@ -9,7 +9,6 @@ namespace OSPF
         {
             Network network = new Network();
 
-            int i = 1;
             network.AddRouter("R1");
             network.AddRouter("R2");
             network.AddRouter("R3");
@@ -28,92 +27,19 @@ namespace OSPF
             network.AddLink("R5", "R6", 5);
             network.AddLink("R1", "R6", 6);
 
+            Menu menu = new Menu(network);
 
-            while (i == 1)
+            while (true)
             {
-                Console.WriteLine("1. Prideti routeri"
-                                    + Environment.NewLine + "2. Prideti rysi "
-                                    + Environment.NewLine + "3. Pasalinti routeri  "
-                                    + Environment.NewLine + "4. Pasalinti rysi "
-                                    + Environment.NewLine + "5. Siusti zinute "
-                                    + Environment.NewLine + "6. Perziureti lentele "
-                                    + Environment.NewLine + "7. Exit");
-                string option = Console.ReadLine();
-                try {
-                    switch (option)
-                    {
-                        case "1":
-                            Console.Write("Routerio vardas: ");
-                            string name = Console.ReadLine();
-                            network.AddRouter(name);
-                            Console.WriteLine("Idetas routeris");
-                            break;
-                        case "2":
-                            Console.Write("Pirmas routeris: ");
-                            string first = Console.ReadLine();
-                            Console.Write("Antras routeris: ");
-                            string second = Console.ReadLine();
-                            Console.Write("Kain tarp routeriu: ");
-                            string cost = Console.ReadLine();
-                            network.AddLink(first, second, int.Parse(cost));
-                            Console.WriteLine("Pridetas rysys");
-                            break;
-                        case "3":
-                            Console.Write("Routerio vardas: ");
-                            string router = Console.ReadLine();
-                            network.RemoveRouter(router);
-                            Console.WriteLine("Isimtas routeris");
-                            break;
-                        case "4":
-                            Console.Write("Pirmas routeris: ");
-                            string first1 = Console.ReadLine();
-                            Console.Write("Antras routeris: ");
-                            string second1 = Console.ReadLine();
-                            network.RemoveLink(first1, second1);
-                            Console.WriteLine("Isimtas rysys tarp routeriu");
-                            break;
-                        case "5":
-                            Console.Write("Pirmas routeris: ");
-                            string source = Console.ReadLine();
-                            Console.Write("Antras routeris: ");
-                            string destination = Console.ReadLine();
-                            Console.Write("Zinute: ");
-                            string msg = Console.ReadLine();
-                            network.SendMessage(source, destination, msg);
-                            Console.WriteLine("Zinute issiusta");
-                            break;
-                        case "6":
-                            Console.Write("Routerio vardas: ");
-                            string routeris = Console.ReadLine();
-                            Dictionary<string, string> conn = network.GetConnections(routeris);
-                            if (conn != null)
-                            {
-                                foreach (string element in conn.Keys)
-                                {
-                                    string getter;
-                                    conn.TryGetValue(element, out getter);
-                                    Console.WriteLine("Destination: " + element + " Send to: " + getter);
-                                }
-                            }
-                            break;
-                        case "7":
-                            i = 0;
-                            break;
-                        default:
-                            Console.WriteLine("Bloga ivestis!");
-                            break;
-                    }
-                }
-                catch (Exception e)
+                menu.ShowOptions();
+                try
                 {
-                    Console.WriteLine(e.Message);
+                    menu.SelectOption();
+                } catch (Exception e)
+                {
+                    Console.WriteLine($"Action failed, reason {e.Message}");
                 }
-            } 
-        }
-
-        public static void Write(string message)
-        {
-            Console.WriteLine(message);
+            }
         }
     }
 }
