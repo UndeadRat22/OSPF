@@ -13,14 +13,14 @@ namespace OSPF
         public string Id { get; private set; }
         public Dictionary<string, string> Connections { get; private set; }
         public List<Router> Neighbors { get; private set; }
-        public Graph Network { get; private set; }
+        public LinkStateDatabase Network { get; private set; }
         private List<int> _updates;
 
         public Router(string id)
         {
             Id = id;
             Neighbors = new List<Router>();
-            Network = new Graph();
+            Network = new LinkStateDatabase();
             Network.AddNode(id);
             Connections = new Dictionary<string, string>
             {
@@ -45,19 +45,19 @@ namespace OSPF
         {
             Neighbors.Remove(router);
             Network.RemoveLink(Id, router.Id);
-            ReceiveUpdate(new Update(Update.Counter, Id, Network));
+            ReceiveUpdate(new LinkStateAdvertisement(LinkStateAdvertisement.Counter, Id, Network));
         }
 
         public void RemoveRouter(Router router)
         {
             Neighbors.Remove(router);
             Network.RemoveNode(router.Id);
-            ReceiveUpdate(new Update(Update.Counter, Id, Network));
+            ReceiveUpdate(new LinkStateAdvertisement(LinkStateAdvertisement.Counter, Id, Network));
         }
 
-        private Update CreateUpdate(Router other)
+        private LinkStateAdvertisement CreateUpdate(Router other)
         {
-            Graph otherNetwork = other.Network;
+            LinkStateDatabase otherNetwork = other.Network;
 
             foreach(string routerId in otherNetwork.Nodes)
             {
@@ -69,16 +69,16 @@ namespace OSPF
                 }
             }
 
-            return new Update(Update.Counter, Id, Network);
+            return new LinkStateAdvertisement(LinkStateAdvertisement.Counter, Id, Network);
         }
 
-        private void BroadcastUpdate(Update packet)
+        private void BroadcastUpdate(LinkStateAdvertisement packet)
         {
             Neighbors
                 .ForEach(neighbor => neighbor.ReceiveUpdate(packet));
         }
 
-        public void ReceiveUpdate(Update packet)
+        public void ReceiveUpdate(LinkStateAdvertisement packet)
         {
             if (_updates.Contains(packet.Number))
                 return;

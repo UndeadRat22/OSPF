@@ -5,7 +5,7 @@ using OSPF.Settings;
 
 namespace OSPF
 {
-    public class Graph
+    public class LinkStateDatabase
     {
 
         private int[][] _networkNodes;
@@ -14,7 +14,7 @@ namespace OSPF
 
         public IEnumerable<string> Nodes { get { return _map.Keys; } }
 
-        public Graph()
+        public LinkStateDatabase()
         {
             _networkNodes = Utility.Matrix(NetworkSettings.MaxNetworkSize);
             _map = new Dictionary<string, int>();

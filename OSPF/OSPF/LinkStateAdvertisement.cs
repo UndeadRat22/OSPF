@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OSPF
 {
-    public class Update
+    public class LinkStateAdvertisement
     {
 
         private static int _counter;
@@ -17,8 +17,8 @@ namespace OSPF
         }
         public int Number { private set; get; }
         public string Sender { private set; get; }
-        public Graph Network { private set; get; }
-        public Update(int number, string sender, Graph network)
+        public LinkStateDatabase Network { private set; get; }
+        public LinkStateAdvertisement(int number, string sender, LinkStateDatabase network)
         {
             Number = number;
             Sender = sender;

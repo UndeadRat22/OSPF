@@ -6,6 +6,7 @@ namespace OSPF
 {
     class Program
     {
+        //Open Shortest Path Fist
         static void Main(string[] args)
         {
             RouterSettings.LoadSettings("router_settings.json");

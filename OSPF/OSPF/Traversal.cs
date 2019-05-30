@@ -8,7 +8,7 @@ namespace OSPF
 
         private const char separator = ':';
 
-        public static Dictionary<string, string> Dijkstra(Graph graph, string source)
+        public static Dictionary<string, string> Dijkstra(LinkStateDatabase graph, string source)
         {
             string[] routerIds = graph.Nodes.ToArray();
             int[] distances = Enumerable
@@ -24,7 +24,7 @@ namespace OSPF
 
             string[] queue = graph.Nodes.ToArray();
 
-            Dictionary<string, string> pred = new Dictionary<string, string>();
+            Dictionary<string, string> destinations = new Dictionary<string, string>();
             bool[] visited = new bool[routerIds.Length];
 
 
@@ -75,15 +75,15 @@ namespace OSPF
                 string[] parts = str.Split(separator);
                 if (parts.Length != 1)
                 {
-                    pred[parts[parts.Length - 1]] = parts[1];
+                    destinations[parts[parts.Length - 1]] = parts[1];
                 }
                 else
                 {
-                    pred[parts[0]] = parts[0];
+                    destinations[parts[0]] = parts[0];
                 }
             }
 
-            return pred;
+            return destinations;
         }
 
         private static int MinDistanceIndex(int[] dist, bool[] visited)
