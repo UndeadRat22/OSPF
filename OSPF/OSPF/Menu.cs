@@ -30,6 +30,8 @@ namespace OSPF
 
         public void ShowOptions()
         {
+            var selectedName = Selected ? _selectedRouter : "None";
+            Console.WriteLine($"Current router: {selectedName}");
             for (int id = 0; id < _options.Count; id++)
             {
                 Console.WriteLine($"{id}: {_options[id].Key}");

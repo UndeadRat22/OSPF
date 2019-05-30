@@ -14,7 +14,13 @@ namespace OSPF
             int[] distances = Enumerable
                 .Repeat(int.MaxValue, routerIds.Length)
                 .ToArray();
-            distances[routerIds.FirstIndex(id => id == source)] = 0;
+            for (int i = 0; i < distances.Length; i++)
+            {
+                if (routerIds[i] == source)
+                {
+                    distances[i] = 0;
+                }
+            }
 
             string[] queue = graph.Nodes.ToArray();
 
@@ -37,8 +43,16 @@ namespace OSPF
                 for (int j = 0; j < neighbors.Length; j++)
                 {
                     //pasiimi 'next' kaimyno indexą
-                    int number = routerIds
-                        .FirstIndex(id => id == neighbors[j]);
+                    /*int number = routerIds
+                        .FirstIndex(id => id == neighbors[j]);*/
+                    int number = 0;
+                    for (int h = 0; h < routerIds.Length; h++)
+                    {
+                        if (routerIds[h] == neighbors[j])
+                        {
+                            number = h;
+                        }
+                    }
 
                     //d - bendra kaina/atstumas
                     //gaunama paėmus atstumą nusigauti iki 

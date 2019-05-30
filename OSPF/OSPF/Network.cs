@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OSPF.Settings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,6 +15,15 @@ namespace OSPF
         {
             _routers = new List<Router>();
         }
+
+        public void UseSettings(RouterSettings settings)
+        {
+            settings.Routers
+                .ForEach(router => AddRouter(router));
+            settings.Links
+                .ForEach(link => AddLink(link.First, link.Second, link.Cost));
+        }
+
         /// <summary>
         /// Returns the connections dictionary for a given router Id
         /// </summary>
@@ -54,10 +64,8 @@ namespace OSPF
                 .FirstOrDefault(r => r.Id == id);
             if (router == null)
                 throw new ArgumentException($"router with id: {id} does not exist");
-            
-            router.Neighbors
-                .ForEach(neighbor => neighbor.RemoveRouter(router));
-
+            foreach (var neighbor in router.Neighbors)
+                neighbor.RemoveRouter(router);
             _routers.Remove(router);
         }
 

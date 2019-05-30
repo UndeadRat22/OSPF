@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using OSPF.Settings;
+
 namespace OSPF
 {
     public class Graph
@@ -14,10 +16,10 @@ namespace OSPF
 
         public Graph()
         {
-            _networkNodes = Utility.Matrix(Settings.MaxNetworkSize);
+            _networkNodes = Utility.Matrix(NetworkSettings.MaxNetworkSize);
             _map = new Dictionary<string, int>();
             _emptyMatrixSlots = Enumerable
-                .Range(0, Settings.MaxNetworkSize)
+                .Range(0, NetworkSettings.MaxNetworkSize)
                 .ToList();
         }
 

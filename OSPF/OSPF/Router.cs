@@ -101,7 +101,7 @@ namespace OSPF
             if (sendTo == null)
                 return false;
             Console.WriteLine($"Sending {data} to {sendTo}, final destination: {destination}");
-            Thread.Sleep(Settings.NetworkDelayTime);
+            Thread.Sleep(Settings.NetworkSettings.NetworkDelayTime);
 
             Router next = Neighbors.FirstOrDefault(router => router.Id == sendTo);
             return next.SendData(destination, data, path);

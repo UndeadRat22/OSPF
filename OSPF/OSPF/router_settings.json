@@ -1,0 +1,56 @@
+{
+  "routers": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R8",
+    "R9"
+  ],
+
+  "links": [
+    {
+      "first": "R1",
+      "second": "R2",
+      "cost": 2
+    },
+    {
+      "first": "R2",
+      "second": "R3",
+      "cost": 5
+    },
+    {
+      "first": "R3",
+      "second": "R4",
+      "cost": 7
+    },
+    {
+      "first": "R1",
+      "second": "R4",
+      "cost": 8
+    },
+    {
+      "first": "R3",
+      "second": "R8",
+      "cost": 4
+    },
+    {
+      "first": "R2",
+      "second": "R7",
+      "cost": 2
+    },
+    {
+      "first": "R9",
+      "second": "R4",
+      "cost": 2
+    },
+    {
+      "first": "R2",
+      "second": "R7",
+      "cost": 2
+    }
+  ]
+}
